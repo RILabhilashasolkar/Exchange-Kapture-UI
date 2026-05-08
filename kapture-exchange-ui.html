@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kapture CRM — Ticket Detail (Exchange UI)</title>
+  <style>
+    /* ── Reset & Base ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      font-size: 13px; color: #333;
+      background: #f0f2f5;
+      height: 100vh;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Top Nav ──────────────────────────────────────────── */
+    .top-nav {
+      height: 48px;
+      background: #fff;
+      border-bottom: 1px solid #dde1e7;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 16px;
+      flex-shrink: 0;
+      z-index: 100;
+    }
+    .nav-left { display: flex; align-items: center; gap: 12px; }
+    .reliance-logo {
+      width: 36px; height: 36px;
+      background: #003087;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .reliance-logo svg { width: 22px; height: 22px; fill: #fff; }
+    .page-title { font-size: 15px; font-weight: 600; color: #1a1a2e; }
+    .nav-right { display: flex; align-items: center; gap: 14px; }
+    .km-portal {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 12px; color: #444; cursor: pointer;
+      padding: 4px 8px; border-radius: 4px;
+      border: 1px solid #e0e0e0;
+    }
+    .bell-wrap { position: relative; cursor: pointer; }
+    .bell-wrap svg { width: 20px; height: 20px; color: #555; }
+    .bell-badge {
+      position: absolute; top: -4px; right: -4px;
+      width: 15px; height: 15px;
+      background: #e53935; border-radius: 50%;
+      color: #fff; font-size: 9px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .avail-toggle {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; color: #888;
+    }
+    .toggle-pill {
+      width: 38px; height: 20px;
+      background: #ccc; border-radius: 10px;
+      position: relative; cursor: pointer;
+    }
+    .toggle-pill::after {
+      content: ''; position: absolute;
+      width: 16px; height: 16px; top: 2px; right: 2px;
+      background: #fff; border-radius: 50%;
+    }
+    .user-btn {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 500; color: #333;
+      cursor: pointer;
+    }
+    .user-avatar {
+      width: 28px; height: 28px;
+      background: #5c6bc0; border-radius: 50%;
+      color: #fff; font-size: 11px; font-weight: 600;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .hamburger { font-size: 18px; color: #555; cursor: pointer; }
+
+    /* ── Main Layout ──────────────────────────────────────── */
+    .main { display: flex; flex: 1; overflow: hidden; }
+
+    /* ── Left Nav Sidebar ─────────────────────────────────── */
+    .side-nav {
+      width: 48px; background: #1b2952;
+      flex-shrink: 0;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 10px 0; gap: 4px;
+    }
+    .sn-icon {
+      width: 38px; height: 38px;
+      border-radius: 6px; cursor: pointer;
+      color: rgba(255,255,255,0.45);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; transition: background 0.15s;
+    }
+    .sn-icon:hover { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); }
+    .sn-icon.active { background: rgba(255,255,255,0.18); color: #fff; }
+    .sn-spacer { flex: 1; }
+
+    /* ── Ticket List Panel ────────────────────────────────── */
+    .ticket-panel {
+      width: 240px; flex-shrink: 0;
+      background: #fff;
+      border-right: 1px solid #dde1e7;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .ticket-panel-head {
+      padding: 10px 12px 8px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .back-link {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 12px; color: #1a73e8; cursor: pointer;
+      margin-bottom: 8px;
+    }
+    .search-box {
+      width: 100%; height: 30px;
+      border: 1px solid #dde1e7; border-radius: 4px;
+      padding: 0 8px 0 28px;
+      font-size: 12px; color: #555; outline: none;
+      background: #f8f9fa url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23aaa' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") no-repeat 7px center;
+    }
+    .ticket-list { overflow-y: auto; flex: 1; }
+    .t-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 9px 12px;
+      border-bottom: 1px solid #f5f5f5;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .t-item:hover { background: #f8f9fc; }
+    .t-item.active {
+      background: #e8f0fe;
+      border-left: 3px solid #1a73e8;
+      padding-left: 9px;
+    }
+    .t-name { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: #333; }
+    .t-avatar {
+      width: 22px; height: 22px; border-radius: 50%;
+      color: #fff; font-size: 8px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .t-time { font-size: 11px; color: #999; white-space: nowrap; }
+
+    /* ── Content Area ─────────────────────────────────────── */
+    .content { flex: 1; display: flex; overflow: hidden; }
+
+    /* ── Info Panel (Middle) ──────────────────────────────── */
+    .info-panel {
+      width: 320px; flex-shrink: 0;
+      background: #f5f6f8;
+      border-right: 1px solid #dde1e7;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .info-tab-bar {
+      background: #fff;
+      border-bottom: 1px solid #dde1e7;
+      padding: 0 16px;
+    }
+    .info-tab {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 11px 0 10px;
+      font-size: 13px; font-weight: 500; color: #1a73e8;
+      border-bottom: 2px solid #1a73e8;
+    }
+    .info-tab-icon { color: #e53935; display: flex; align-items: center; }
+    .info-sections { overflow-y: auto; flex: 1; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+
+    /* Info Accordion */
+    .i-acc { background: #fff; border: 1px solid #dde1e7; border-radius: 4px; overflow: hidden; }
+    .i-acc-head {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 11px 14px; cursor: pointer;
+    }
+    .i-acc-head:hover { background: #fafafa; }
+    .i-acc-title { font-size: 13px; font-weight: 500; color: #1a73e8; }
+    .i-acc-meta { display: flex; align-items: center; gap: 8px; }
+    .i-acc-date { font-size: 11px; color: #999; }
+    .chevron-icon { font-size: 11px; color: #888; transition: transform 0.2s; display: inline-block; }
+    .chevron-icon.up { transform: rotate(180deg); }
+    .i-acc-body { padding: 12px 14px; border-top: 1px solid #f0f0f0; display: none; }
+    .i-acc-body.open { display: block; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; }
+    .f-group { display: flex; flex-direction: column; gap: 2px; }
+    .f-label { font-size: 11px; color: #999; }
+    .f-val { font-size: 12px; color: #333; word-break: break-word; }
+
+    /* ── Right Detail Panel ───────────────────────────────── */
+    .detail-panel {
+      flex: 1;
+      background: #f5f6f8;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+    .detail-tab-bar {
+      background: #fff;
+      border-bottom: 1px solid #dde1e7;
+      padding: 0 12px;
+      display: flex; align-items: center; gap: 2px;
+    }
+    .d-tab {
+      display: flex; align-items: center; gap: 5px;
+      padding: 12px 10px 10px;
+      font-size: 12.5px; color: #888;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: color 0.15s;
+    }
+    .d-tab:hover { color: #555; }
+    .d-tab.active { color: #1a73e8; border-bottom-color: #1a73e8; font-weight: 500; }
+    .d-tab svg { width: 16px; height: 16px; }
+    .d-tab-spacer { flex: 1; }
+    .d-tab-add { font-size: 18px; color: #888; cursor: pointer; padding: 8px; }
+
+    /* Orders Content */
+    .orders-content { flex: 1; overflow-y: auto; padding: 12px 14px; }
+    .section-heading { font-size: 14px; font-weight: 600; color: #1a1a2e; margin-bottom: 12px; }
+
+    /* ── Exchange Status Strip (NEW) ──────────────────────── */
+    .exc-strip {
+      background: #fff;
+      border: 1px solid #dde1e7;
+      border-radius: 6px;
+      padding: 10px 16px;
+      margin-bottom: 10px;
+      display: flex; align-items: center; gap: 20px;
+      flex-wrap: wrap;
+    }
+    .exc-chip-group { display: flex; flex-direction: column; gap: 3px; }
+    .exc-chip-label { font-size: 10px; color: #999; font-weight: 500; text-transform: uppercase; letter-spacing: 0.4px; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 10px; border-radius: 12px;
+      font-size: 11.5px; font-weight: 500;
+      white-space: nowrap;
+    }
+    .chip-green  { background: #e6f4ea; color: #1e7e34; }
+    .chip-blue   { background: #e8f0fe; color: #1a73e8; }
+    .chip-orange { background: #fff3e0; color: #e65100; }
+    .chip-gray   { background: #f1f3f4; color: #5f6368; }
+    .chip-red    { background: #fce8e6; color: #c62828; }
+    .chip-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      display: inline-block;
+    }
+    .dot-green  { background: #1e7e34; }
+    .dot-blue   { background: #1a73e8; }
+    .dot-orange { background: #e65100; }
+    .dot-gray   { background: #5f6368; }
+    .dot-red    { background: #c62828; }
+
+    /* ── Order Section Card ───────────────────────────────── */
+    .o-section {
+      background: #fff;
+      border: 1px solid #dde1e7;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+    .o-section-head {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 11px 16px;
+      cursor: pointer;
+    }
+    .o-section-head:hover { background: #fafafa; }
+    .o-section-title { font-size: 13px; font-weight: 600; color: #1a73e8; }
+    .o-section-body { padding: 12px 16px; border-top: 1px solid #f0f0f0; }
+    .o-section-body.hidden { display: none; }
+
+    /* Product Table */
+    .prod-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .prod-table th {
+      text-align: left; padding: 7px 10px;
+      background: #f8f9fa; color: #666;
+      font-weight: 600; font-size: 11px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .prod-table td { padding: 8px 10px; border-bottom: 1px solid #f5f5f5; color: #333; }
+    .prod-table tr:last-child td { border-bottom: none; }
+    .prod-icon {
+      width: 26px; height: 26px; background: #e8f0fe;
+      border-radius: 4px; display: flex; align-items: center; justify-content: center;
+    }
+
+    /* Field Grid */
+    .f-grid   { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px 12px; }
+    .f-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 12px; }
+    .s-field { display: flex; flex-direction: column; gap: 3px; }
+    .s-label { font-size: 11px; color: #999; }
+    .s-val   { font-size: 12px; color: #333; line-height: 1.4; }
+    .span-2 { grid-column: span 2; }
+    .span-3 { grid-column: span 3; }
+
+    /* Badges */
+    .badge {
+      display: inline-flex; align-items: center;
+      padding: 2px 8px; border-radius: 10px;
+      font-size: 11px; font-weight: 500;
+    }
+    .badge-green  { background: #e6f4ea; color: #1e7e34; }
+    .badge-blue   { background: #e8f0fe; color: #1a73e8; }
+    .badge-orange { background: #fff3e0; color: #e65100; }
+    .badge-gray   { background: #f1f3f4; color: #5f6368; }
+    .badge-red    { background: #fce8e6; color: #c62828; }
+
+    /* ── MOP Before / After Table ─────────────────────────── */
+    .mop-wrap { overflow-x: auto; }
+    .mop-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .mop-table thead tr th { padding: 8px 14px; font-size: 11px; font-weight: 600; text-align: left; }
+    .mop-table th.col-field { background: #f8f9fa; color: #555; min-width: 200px; }
+    .mop-table th.col-before { background: #e8f0fe; color: #1a73e8; min-width: 150px; }
+    .mop-table th.col-after  { background: #e6f4ea; color: #1e7e34; min-width: 150px; }
+    .mop-table td { padding: 8px 14px; border-bottom: 1px solid #f5f5f5; }
+    .mop-table tr:last-child td { border-bottom: none; }
+    .mop-table td.td-field { font-size: 12px; color: #555; font-weight: 500; background: #fafafa; }
+    .mop-table td.td-before { color: #333; }
+    .mop-table td.td-after  { color: #333; }
+    .val-note { font-size: 10px; color: #999; display: block; margin-top: 1px; }
+    .diff-box {
+      margin-top: 10px;
+      background: #fffde7; border: 1px solid #fff176;
+      border-left: 3px solid #f9a825;
+      border-radius: 4px; padding: 9px 12px;
+      font-size: 12px; color: #5d4037; line-height: 1.5;
+    }
+    .diff-box strong { color: #e65100; }
+
+    /* ── Refund Details ───────────────────────────────────── */
+    .refund-summary {
+      background: #f0f7ff; border: 1px solid #b3d4f5;
+      border-radius: 4px; padding: 10px 14px;
+      font-size: 12px; color: #1a3a5c; line-height: 1.6;
+      margin-bottom: 14px;
+    }
+    .refund-split { display: flex; gap: 10px; margin-bottom: 14px; }
+    .refund-split-card {
+      flex: 1; background: #fafafa;
+      border: 1px solid #e0e0e0; border-radius: 5px;
+      padding: 10px 14px;
+    }
+    .rsc-label { font-size: 11px; color: #999; margin-bottom: 4px; }
+    .rsc-val   { font-size: 15px; font-weight: 600; color: #333; }
+    .divider { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
+
+    /* Tracking list */
+    .track-row {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px; padding: 9px 0;
+      border-bottom: 1px solid #f5f5f5;
+    }
+    .track-row:last-child { border-bottom: none; }
+
+    /* ── Bottom Status Bar ────────────────────────────────── */
+    .status-bar {
+      height: 24px; background: #1b2952;
+      display: flex; align-items: center; padding: 0 14px;
+      gap: 12px; flex-shrink: 0;
+    }
+    .stable-pill {
+      background: #4caf50; color: #fff;
+      font-size: 10px; font-weight: 700;
+      padding: 1px 8px; border-radius: 10px;
+    }
+    .version-txt { color: rgba(255,255,255,0.55); font-size: 10px; }
+    .status-right { margin-left: auto; color: rgba(255,255,255,0.55); font-size: 10px; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
+    ::-webkit-scrollbar-thumb:hover { background: #bbb; }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════
+     TOP NAVIGATION
+══════════════════════════════════════════════════ -->
+<nav class="top-nav">
+  <div class="nav-left">
+    <div class="reliance-logo">
+      <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/><text x="18" y="23" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">R</text></svg>
+    </div>
+    <span class="page-title">Tickets</span>
+  </div>
+  <div class="nav-right">
+    <div class="km-portal">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+      KM Portal
+    </div>
+    <div class="bell-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="bell-badge">1</span>
+    </div>
+    <div class="avail-toggle">
+      <div class="toggle-pill"></div>
+      <span>Not Av...</span>
+    </div>
+    <div class="user-btn">
+      <div class="user-avatar">AA</div>
+      <span>Abhilash Asolkar</span>
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <span class="hamburger">&#9776;</span>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════════
+     MAIN LAYOUT
+══════════════════════════════════════════════════ -->
+<div class="main">
+
+  <!-- Left Nav Sidebar -->
+  <nav class="side-nav">
+    <div class="sn-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    </div>
+    <div class="sn-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    </div>
+    <div class="sn-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    </div>
+    <div class="sn-icon active">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+    </div>
+    <div class="sn-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 19.07a10 10 0 0 1 0-14.14"/></svg>
+    </div>
+    <div class="sn-spacer"></div>
+    <div class="sn-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 19.07l1.41-1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+    </div>
+  </nav>
+
+  <!-- ── Ticket List Panel ──────────────────────────────── -->
+  <div class="ticket-panel">
+    <div class="ticket-panel-head">
+      <div class="back-link">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        All Pending
+      </div>
+      <input class="search-box" type="text" placeholder="Search">
+    </div>
+    <div class="ticket-list">
+      <div class="t-item"><div class="t-name"><div class="t-avatar" style="background:#ef5350">AC</div>Anshika Chugh</div><span class="t-time">17:38</span></div>
+      <div class="t-item active"><div class="t-name"><div class="t-avatar" style="background:#5c6bc0">MA</div>Mahesh Ashopa</div><span class="t-time">17:38</span></div>
+      <div class="t-item"><div class="t-name"><div class="t-avatar" style="background:#26a69a">NJ</div>Nitin Jarhad</div><span class="t-time">17:38</span></div>
+      <div class="t-item"><div class="t-name"><div class="t-avatar" style="background:#66bb6a">RK</div>Rupesh kumar</div><span class="t-time">17:37</span></div>
+      <div class="t-item"><div class="t-name"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>milind.shenoy@...</div><span class="t-time">17:37</span></div>
+      <div class="t-item"><div class="t-name"><div class="t-avatar" style="background:#ab47bc">SL</div>SHRISTI LAL</div><span class="t-time">17:36</span></div>
+      <div class="t-item"><div class="t-name"><div class="t-avatar" style="background:#29b6f6">AS</div>Ayushi Shrivastava</div><span class="t-time">17:36</span></div>
+      <div class="t-item"><div class="t-name"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>rkverma1307@g...</div><span class="t-time">17:36</span></div>
+      <div class="t-item"><div class="t-name"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>zabiulla4.khan@...</div><span class="t-time">17:36</span></div>
+      <div class="t-item"><div class="t-name"><div class="t-avatar" style="background:#ff7043">SR</div>Shashikala Rajego...</div><span class="t-time">17:36</span></div>
+      <div class="t-item"><div class="t-name"><div class="t-avatar" style="background:#8d6e63">HW</div>Hardik Wadher</div><span class="t-time">17:36</span></div>
+      <div class="t-item"><div class="t-name"><div class="t-avatar" style="background:#78909c">SV</div>siva v</div><span class="t-time">17:35</span></div>
+      <div class="t-item"><div class="t-name"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>mshrinath@hot...</div><span class="t-time">17:35</span></div>
+      <div class="t-item"><div class="t-name"><div class="t-avatar" style="background:#ec407a">IN</div>Ishika NA</div><span class="t-time">17:35</span></div>
+      <div class="t-item"><div class="t-name"><div class="t-avatar" style="background:#5c6bc0">KK</div>Kishore K</div><span class="t-time">17:35</span></div>
+      <div class="t-item"><div class="t-name"><div class="t-avatar" style="background:#ff5722">AM</div>Ashok Reddy Malgari</div><span class="t-time">17:34</span></div>
+      <div class="t-item"><div class="t-name"><div class="t-avatar" style="background:#90a4ae">SK</div>Sheen Khurdi</div><span class="t-time">17:34</span></div>
+    </div>
+  </div>
+
+  <!-- ── Content ────────────────────────────────────────── -->
+  <div class="content">
+
+    <!-- Info Panel (Middle) -->
+    <div class="info-panel">
+      <div class="info-tab-bar">
+        <div class="info-tab">
+          <span class="info-tab-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e53935" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          </span>
+          Info
+        </div>
+      </div>
+      <div class="info-sections">
+
+        <!-- Order Information -->
+        <div class="i-acc">
+          <div class="i-acc-head" onclick="toggleAcc(this)">
+            <span class="i-acc-title">Order Information</span>
+            <div class="i-acc-meta">
+              <span class="i-acc-date">23rd Apr 2026, 05:38:06 pm</span>
+              <span class="chevron-icon up">&#9660;</span>
+            </div>
+          </div>
+          <div class="i-acc-body open">
+            <div class="info-grid">
+              <div class="f-group"><div class="f-label">Shipment Id</div><div class="f-val">RD69E868590E9162F7EF-01</div></div>
+              <div class="f-group"><div class="f-label">Shipment Created Time</div><div class="f-val">22-04-2026 11:53:04</div></div>
+              <div class="f-group"><div class="f-label">Status</div><div class="f-val">Delivered</div></div>
+              <div class="f-group"><div class="f-label">Vertical</div><div class="f-val">ELECTRONICS</div></div>
+              <div class="f-group"><div class="f-label">Total Amount</div><div class="f-val">30990</div></div>
+              <div class="f-group"><div class="f-label">Expected Delivery Date</div><div class="f-val">23-04-2026</div></div>
+              <div class="f-group"><div class="f-label">Fulfillment Store</div><div class="f-val">S3TP</div></div>
+              <div class="f-group"><div class="f-label">Calculated Amount</div><div class="f-val">30990</div></div>
+              <div class="f-group"><div class="f-label">Fynd Shipping</div><div class="f-val">51 123 City home nilay Jodhpur Gramin, Pal sagariya li yyy, Jodhpur, Rajasthan</div></div>
+              <div class="f-group"><div class="f-label">Payment Mode</div><div class="f-val">PREPAID</div></div>
+              <div class="f-group"><div class="f-label">Delivery Charge</div><div class="f-val">0.0</div></div>
+              <div class="f-group"><div class="f-label">Invoice No</div><div class="f-val">S3TP99326550919</div></div>
+              <div class="f-group"><div class="f-label">Calculated Amount</div><div class="f-val">30990</div></div>
+              <div class="f-group"><div class="f-label">Overall Discount</div><div class="f-val">N/A</div></div>
+              <div class="f-group"><div class="f-label">Lsp Name</div><div class="f-val">N/A</div></div>
+              <div class="f-group"><div class="f-label">Invoice Amt</div><div class="f-val">30990.00</div></div>
+              <div class="f-group"><div class="f-label">Source</div><div class="f-val">ROMS</div></div>
+              <div class="f-group"><div class="f-label">Selected Quantity</div><div class="f-val">1</div></div>
+              <div class="f-group"><div class="f-label">Sku Id</div><div class="f-val">581112270</div></div>
+              <div class="f-group" style="grid-column:span 2;"><div class="f-label">Product Name</div><div class="f-val">Godrej Split Air Conditioner 1.5 Ton 3 Star Inverter 18Y3TG WA, 5 in 1 Convertible, AI Technology</div></div>
+              <div class="f-group"><div class="f-label">Qty</div><div class="f-val">1</div></div>
+              <div class="f-group"><div class="f-label">Sellingprice</div><div class="f-val">30990</div></div>
+              <div class="f-group"><div class="f-label">Sellername</div><div class="f-val">N/A</div></div>
+              <div class="f-group"><div class="f-label">Overall Discount</div><div class="f-val">N/A</div></div>
+              <div class="f-group"><div class="f-label">Mrp</div><div class="f-val">30990</div></div>
+              <div class="f-group"><div class="f-label">Refund Number</div><div class="f-val">N/A</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ticket Additional Info -->
+        <div class="i-acc">
+          <div class="i-acc-head" onclick="toggleAcc(this)">
+            <span class="i-acc-title">Ticket Additional Info</span>
+            <div class="i-acc-meta">
+              <span class="i-acc-date">23rd Apr 2026, 05:38:06 pm</span>
+              <span class="chevron-icon">&#9660;</span>
+            </div>
+          </div>
+          <div class="i-acc-body"></div>
+        </div>
+
+        <!-- RRP Info -->
+        <div class="i-acc">
+          <div class="i-acc-head" onclick="toggleAcc(this)">
+            <span class="i-acc-title">RRP Info</span>
+            <div class="i-acc-meta">
+              <span class="i-acc-date">23rd Apr 2026, 05:38:06 pm</span>
+              <span class="chevron-icon">&#9660;</span>
+            </div>
+          </div>
+          <div class="i-acc-body"></div>
+        </div>
+
+      </div>
+    </div><!-- /info-panel -->
+
+    <!-- ── Right Detail Panel ──────────────────────────── -->
+    <div class="detail-panel">
+
+      <!-- Tab Bar -->
+      <div class="detail-tab-bar">
+        <div class="d-tab" title="Details">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div class="d-tab active" title="Orders">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          Orders
+        </div>
+        <div class="d-tab" title="Tasks">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <div class="d-tab" title="Chat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div class="d-tab" title="History">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="d-tab" title="Calendar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <div class="d-tab" title="Flag">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+        </div>
+        <div class="d-tab-spacer"></div>
+        <span class="d-tab-add" title="Add">&#9707;</span>
+      </div>
+
+      <!-- Orders Tab Content -->
+      <div class="orders-content">
+        <div class="section-heading">Tagged Order Details</div>
+
+        <!-- ════════════════════════════════════════════════
+             EXCHANGE STATUS STRIP  ← NEW
+             Appears at top of right panel for exchange tickets
+             (exchange_availed = true OR exchange_eligibility = true)
+        ════════════════════════════════════════════════ -->
+        <div class="exc-strip">
+          <div class="exc-chip-group">
+            <span class="exc-chip-label">Exchange Availed</span>
+            <span class="chip chip-green"><span class="chip-dot dot-green"></span>Yes</span>
+          </div>
+          <div class="exc-chip-group">
+            <span class="exc-chip-label">Exchange Status</span>
+            <span class="chip chip-blue"><span class="chip-dot dot-blue"></span>Exchange Confirmed</span>
+          </div>
+          <div class="exc-chip-group">
+            <span class="exc-chip-label">QC Decision</span>
+            <span class="chip chip-green"><span class="chip-dot dot-green"></span>Accepted</span>
+          </div>
+          <div class="exc-chip-group">
+            <span class="exc-chip-label">Refund Status</span>
+            <span class="chip chip-orange"><span class="chip-dot dot-orange"></span>Processing</span>
+          </div>
+        </div>
+
+        <!-- ════════════════════════════════════════════════
+             1. PRODUCT INFORMATION  (existing — unchanged)
+        ════════════════════════════════════════════════ -->
+        <div class="o-section">
+          <div class="o-section-head" onclick="toggleSection(this)">
+            <span class="o-section-title">Product Information</span>
+            <span class="chevron-icon up">&#9660;</span>
+          </div>
+          <div class="o-section-body">
+            <div style="overflow-x:auto;">
+              <table class="prod-table">
+                <thead>
+                  <tr>
+                    <th style="width:32px;"></th>
+                    <th>SKU</th>
+                    <th>Name</th>
+                    <th>Quantity</th>
+                    <th>Selling Price</th>
+                    <th>Delivery Type</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <div class="prod-icon">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a73e8" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                      </div>
+                    </td>
+                    <td>581112270</td>
+                    <td>Godrej Split Air Conditione...1</td>
+                    <td>1</td>
+                    <td>30990</td>
+                    <td>DC</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ════════════════════════════════════════════════
+             2. EXCHANGE SUMMARY  ← NEW SECTION
+             Auto-expanded when exchange_availed = true
+             or exchange_eligibility = true
+        ════════════════════════════════════════════════ -->
+        <div class="o-section">
+          <div class="o-section-head" onclick="toggleSection(this)">
+            <span class="o-section-title">Exchange Summary</span>
+            <span class="chevron-icon up">&#9660;</span>
+          </div>
+          <div class="o-section-body">
+            <div class="f-grid">
+
+              <div class="s-field">
+                <span class="s-label">Exchange Eligibility</span>
+                <span class="s-val"><span class="badge badge-green">True</span></span>
+              </div>
+
+              <div class="s-field">
+                <span class="s-label">Exchange Availed</span>
+                <span class="s-val"><span class="badge badge-green">True</span></span>
+              </div>
+
+              <div class="s-field">
+                <span class="s-label">Exchange Status</span>
+                <span class="s-val"><span class="badge badge-blue">Exchange Confirmed</span></span>
+              </div>
+
+              <div class="s-field">
+                <span class="s-label">Child Order ID</span>
+                <span class="s-val">CHD-RD-2026-001234</span>
+              </div>
+
+              <div class="s-field">
+                <span class="s-label">Product Brand</span>
+                <span class="s-val">Samsung</span>
+              </div>
+
+              <div class="s-field">
+                <span class="s-label">Product Variant</span>
+                <span class="s-val">Galaxy S23, 8GB / 256GB</span>
+              </div>
+
+              <div class="s-field">
+                <span class="s-label">IMEI Captured</span>
+                <span class="s-val"><span class="badge badge-green">Yes</span></span>
+              </div>
+
+              <div class="s-field">
+                <span class="s-label">IMEI Validation — PDP</span>
+                <span class="s-val"><span class="badge badge-green">Passed</span></span>
+              </div>
+
+              <div class="s-field">
+                <span class="s-label">IMEI Validation — Doorstep</span>
+                <span class="s-val"><span class="badge badge-green">Passed</span></span>
+              </div>
+
+              <div class="s-field">
+                <span class="s-label">QC Decision</span>
+                <span class="s-val"><span class="badge badge-green">Accepted</span></span>
+              </div>
+
+              <div class="s-field span-2">
+                <span class="s-label">QC Comments</span>
+                <span class="s-val">Device in good condition — all functional and cosmetic checks passed at doorstep</span>
+              </div>
+
+              <div class="s-field">
+                <span class="s-label">Pickup Partner Name</span>
+                <span class="s-val">Cashify</span>
+              </div>
+
+              <div class="s-field">
+                <span class="s-label">Exchange Pickup Serviceable</span>
+                <span class="s-val"><span class="badge badge-green">Yes</span></span>
+              </div>
+
+              <!--
+                Non-Serviceable Reason is conditionally shown.
+                Rendered below only when exchange_pickup_serviceable = false.
+
+                <div class="s-field">
+                  <span class="s-label">Non-Serviceable Reason</span>
+                  <span class="s-val">—</span>
+                </div>
+              -->
+
+            </div>
+          </div>
+        </div>
+
+        <!-- ════════════════════════════════════════════════
+             3. ORDER INFO  (existing — unchanged)
+        ════════════════════════════════════════════════ -->
+        <div class="o-section">
+          <div class="o-section-head" onclick="toggleSection(this)">
+            <span class="o-section-title">Order Info</span>
+            <span class="chevron-icon">&#9660;</span>
+          </div>
+          <div class="o-section-body hidden">
+            <div class="f-grid">
+              <div class="s-field"><span class="s-label">Station</span><span class="s-val">delivered</span></div>
+              <div class="s-field"><span class="s-label">Invoice No</span><span class="s-val">S3TP99326550919</span></div>
+              <div class="s-field"><span class="s-label">Invoice Url</span><span class="s-val">N/A</span></div>
+              <div class="s-field"><span class="s-label">Invoice Amount</span><span class="s-val">30990.00</span></div>
+              <div class="s-field"><span class="s-label">Secured Delivery Flag</span><span class="s-val">N/A</span></div>
+              <div class="s-field"><span class="s-label">Payment Method</span><span class="s-val">N/A</span></div>
+              <div class="s-field"><span class="s-label">OD Change Count</span><span class="s-val">0</span></div>
+              <div class="s-field"><span class="s-label">Org EDO</span><span class="s-val">24-04-2026 00:00:00</span></div>
+              <div class="s-field"><span class="s-label">Discount</span><span class="s-val">N/A</span></div>
+              <div class="s-field"><span class="s-label">Fulfillment Store</span><span class="s-val">S3TP</span></div>
+              <div class="s-field"><span class="s-label">Fulfillment Store Type</span><span class="s-val">N/A</span></div>
+              <div class="s-field"><span class="s-label">Total Bag Qty</span><span class="s-val">N/A</span></div>
+              <div class="s-field"><span class="s-label">Kirana Store Id</span><span class="s-val">N/A</span></div>
+              <div class="s-field"><span class="s-label">Order Type</span><span class="s-val">N/A</span></div>
+              <div class="s-field"><span class="s-label">Mid</span><span class="s-val">N/A</span></div>
+              <div class="s-field"><span class="s-label">Id</span><span class="s-val">RD69E868590E9162F7EF</span></div>
+              <div class="s-field"><span class="s-label">Source</span><span class="s-val">ROMS</span></div>
+              <div class="s-field"><span class="s-label">Vertical</span><span class="s-val">ELECTRONICS</span></div>
+              <div class="s-field"><span class="s-label">Order Id</span><span class="s-val">RD69E868590E9162F7EF</span></div>
+              <div class="s-field"><span class="s-label">Shipment Id</span><span class="s-val">RD69E868590E9162F7EF-01</span></div>
+              <div class="s-field"><span class="s-label">Customer Id</span><span class="s-val">6658dcd12d689c74ba9c537</span></div>
+              <div class="s-field"><span class="s-label">Go Green</span><span class="s-val">false</span></div>
+              <div class="s-field"><span class="s-label">Order Created Time</span><span class="s-val">1776858784000</span></div>
+              <div class="s-field"><span class="s-label">Awb No</span><span class="s-val">N/A</span></div>
+              <div class="s-field"><span class="s-label">Cn No</span><span class="s-val">N/A</span></div>
+              <div class="s-field"><span class="s-label">Transporter Id</span><span class="s-val">02</span></div>
+              <div class="s-field"><span class="s-label">Ship Type</span><span class="s-val">N/A</span></div>
+              <div class="s-field"><span class="s-label">Pay Link</span><span class="s-val">N/A</span></div>
+              <div class="s-field"><span class="s-label">Shipment Created At</span><span class="s-val">22-04-2026 11:53:04</span></div>
+              <div class="s-field"><span class="s-label">Payment Mode</span><span class="s-val">PREPAID</span></div>
+              <div class="s-field"><span class="s-label">Expected Delivery Date</span><span class="s-val">23-04-2026</span></div>
+              <div class="s-field"><span class="s-label">Total Price</span><span class="s-val">30990</span></div>
+              <div class="s-field"><span class="s-label">Invoice Amt</span><span class="s-val">30990.00</span></div>
+              <div class="s-field"><span class="s-label">Order Amt</span><span class="s-val">30990</span></div>
+              <div class="s-field"><span class="s-label">Is 3 P</span><span class="s-val">false</span></div>
+              <div class="s-field"><span class="s-label">Channel Type</span><span class="s-val">RD</span></div>
+              <div class="s-field"><span class="s-label">Pay Button</span><span class="s-val">false</span></div>
+              <div class="s-field span-2"><span class="s-label">Order Id</span><span class="s-val">RD69E868590E9162F7EF</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ════════════════════════════════════════════════
+             4. MOP & PAYMENT – BEFORE / AFTER EXCHANGE  ← NEW SECTION
+             Auto-expanded for exchange tickets
+        ════════════════════════════════════════════════ -->
+        <div class="o-section">
+          <div class="o-section-head" onclick="toggleSection(this)">
+            <span class="o-section-title">MOP &amp; Payment – Before / After Exchange</span>
+            <span class="chevron-icon up">&#9660;</span>
+          </div>
+          <div class="o-section-body">
+            <div class="mop-wrap">
+              <table class="mop-table">
+                <thead>
+                  <tr>
+                    <th class="col-field">Field</th>
+                    <th class="col-before">Before Exchange</th>
+                    <th class="col-after">After Exchange</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="td-field">MRP</td>
+                    <td class="td-before">&#8377;32,990</td>
+                    <td class="td-after">&#8377;32,990</td>
+                  </tr>
+                  <tr>
+                    <td class="td-field">Selling Price</td>
+                    <td class="td-before">&#8377;30,990</td>
+                    <td class="td-after">&#8377;30,990</td>
+                  </tr>
+                  <tr>
+                    <td class="td-field">Brand Discount</td>
+                    <td class="td-before">&#8377;2,000</td>
+                    <td class="td-after">&#8377;2,000</td>
+                  </tr>
+                  <tr>
+                    <td class="td-field">Payment / Card Discount</td>
+                    <td class="td-before">&#8377;500</td>
+                    <td class="td-after">&#8377;500</td>
+                  </tr>
+                  <tr>
+                    <td class="td-field">Exchange Quote / Value</td>
+                    <td class="td-before">&#8377;5,000 <span class="val-note">Initial Quote</span></td>
+                    <td class="td-after">&#8377;4,500 <span class="val-note">Actual Value</span></td>
+                  </tr>
+                  <tr>
+                    <td class="td-field">Promo Offer</td>
+                    <td class="td-before">N/A</td>
+                    <td class="td-after">N/A</td>
+                  </tr>
+                  <tr>
+                    <td class="td-field">Bump-Up Bonus</td>
+                    <td class="td-before">&#8377;0</td>
+                    <td class="td-after">&#8377;0</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="diff-box">
+              <strong>Difference Explanation:</strong>
+              Exchange quote revised at doorstep — minor screen scratch detected during QC inspection.
+              Value updated from &#8377;5,000 (initial checkout quote) to &#8377;4,500 (settled doorstep value).
+            </div>
+          </div>
+        </div>
+
+        <!-- ════════════════════════════════════════════════
+             5. DELIVERY DETAILS  (existing — unchanged)
+        ════════════════════════════════════════════════ -->
+        <div class="o-section">
+          <div class="o-section-head" onclick="toggleSection(this)">
+            <span class="o-section-title">Delivery Details</span>
+            <span class="chevron-icon up">&#9660;</span>
+          </div>
+          <div class="o-section-body">
+            <div class="f-grid">
+              <div class="s-field"><span class="s-label">Phone</span><span class="s-val">8005634273</span></div>
+              <div class="s-field"><span class="s-label">Pincode</span><span class="s-val">342014</span></div>
+              <div class="s-field"><span class="s-label">Customer Address</span><span class="s-val">51 123 City home nilay Jodhpur Gramin, Pal sagariya li yyy, Jodhpur, Rajasthan</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ════════════════════════════════════════════════
+             6. PAYMENT DETAILS  (existing — unchanged)
+        ════════════════════════════════════════════════ -->
+        <div class="o-section">
+          <div class="o-section-head" onclick="toggleSection(this)">
+            <span class="o-section-title">Payment Details</span>
+            <span class="chevron-icon up">&#9660;</span>
+          </div>
+          <div class="o-section-body">
+            <div class="f-grid">
+              <div class="s-field"><span class="s-label">Txn Date</span><span class="s-val">22-04-2026 11:53:05</span></div>
+              <div class="s-field"><span class="s-label">Payment Id</span><span class="s-val">189</span></div>
+              <div class="s-field"><span class="s-label">Payment Amt</span><span class="s-val">30990</span></div>
+              <div class="s-field"><span class="s-label">Payment Desc</span><span class="s-val">Credit Card</span></div>
+              <div class="s-field span-2"><span class="s-label">Transaction Ref Number</span><span class="s-val">RD69E868590E9162F7EF</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ════════════════════════════════════════════════
+             7. TRACKING LIST  (existing — unchanged)
+        ════════════════════════════════════════════════ -->
+        <div class="o-section">
+          <div class="o-section-head" onclick="toggleSection(this)">
+            <span class="o-section-title">Tracking List</span>
+            <span class="chevron-icon">&#9660;</span>
+          </div>
+          <div class="o-section-body hidden">
+            <div class="track-row">
+              <div class="s-field"><span class="s-label">Status</span><span class="s-val">Ordered</span></div>
+              <div class="s-field"><span class="s-label">Date</span><span class="s-val">22-04-2026 11:53:04</span></div>
+              <div class="s-field"><span class="s-label">Is Current</span><span class="s-val">false</span></div>
+              <div class="s-field"><span class="s-label">Is Passed</span><span class="s-val">true</span></div>
+            </div>
+            <div class="track-row">
+              <div class="s-field"><span class="s-label">Status</span><span class="s-val">Under process</span></div>
+              <div class="s-field"><span class="s-label">Date</span><span class="s-val">22-04-2026 14:59:49</span></div>
+              <div class="s-field"><span class="s-label">Is Current</span><span class="s-val">false</span></div>
+              <div class="s-field"><span class="s-label">Is Passed</span><span class="s-val">true</span></div>
+            </div>
+            <div class="track-row">
+              <div class="s-field"><span class="s-label">Status</span><span class="s-val">Shipped</span></div>
+              <div class="s-field"><span class="s-label">Date</span><span class="s-val">N/A</span></div>
+              <div class="s-field"><span class="s-label">Is Current</span><span class="s-val">false</span></div>
+              <div class="s-field"><span class="s-label">Is Passed</span><span class="s-val">false</span></div>
+            </div>
+            <div class="track-row">
+              <div class="s-field"><span class="s-label">Status</span><span class="s-val">Delivered</span></div>
+              <div class="s-field"><span class="s-label">Date</span><span class="s-val">23-04-2026 14:52:37</span></div>
+              <div class="s-field"><span class="s-label">Is Current</span><span class="s-val">true</span></div>
+              <div class="s-field"><span class="s-label">Is Passed</span><span class="s-val">false</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ════════════════════════════════════════════════
+             8. REFUND DETAILS  (enhanced — auto-expanded when refund data exists)
+             New fields: refund_calculation_summary highlighted block,
+             source + wallet breakdown cards, exchange refund fields
+        ════════════════════════════════════════════════ -->
+        <div class="o-section">
+          <div class="o-section-head" onclick="toggleSection(this)">
+            <span class="o-section-title">Refund Details</span>
+            <span class="chevron-icon up">&#9660;</span>
+          </div>
+          <div class="o-section-body">
+
+            <!-- Refund Calculation Summary — highlighted block at top -->
+            <div class="refund-summary">
+              Customer cancelled after exchange rejection at doorstep (exchange_rejected_at_doorstep).
+              Full refund of &#8377;30,490 initiated to original payment method (Credit Card — HDFC Bank).
+              Exchange delta of &#8377;500 to be credited separately to RD Wallet within 3–5 business days.
+              Customer may be required to pay back exchange discount to delivery partner — confirm before communicating.
+            </div>
+
+            <!-- Source + Wallet split cards -->
+            <div class="refund-split">
+              <div class="refund-split-card">
+                <div class="rsc-label">Refund to Source (Credit Card)</div>
+                <div class="rsc-val">&#8377;30,490</div>
+              </div>
+              <div class="refund-split-card">
+                <div class="rsc-label">Refund to Wallet (RD Wallet)</div>
+                <div class="rsc-val">&#8377;500</div>
+              </div>
+            </div>
+
+            <hr class="divider">
+
+            <div class="f-grid">
+              <div class="s-field">
+                <span class="s-label">Refund Applicable</span>
+                <span class="s-val"><span class="badge badge-green">Yes</span></span>
+              </div>
+              <div class="s-field span-2">
+                <span class="s-label">Refund Trigger Reason</span>
+                <span class="s-val">Exchange rejected at doorstep</span>
+              </div>
+
+              <div class="s-field">
+                <span class="s-label">Refund Amount</span>
+                <span class="s-val">&#8377;30,990</span>
+              </div>
+              <div class="s-field">
+                <span class="s-label">Refund Mode</span>
+                <span class="s-val">Bank Transfer</span>
+              </div>
+              <div class="s-field">
+                <span class="s-label">Refund to Original Payment</span>
+                <span class="s-val"><span class="badge badge-green">Yes</span></span>
+              </div>
+
+              <div class="s-field">
+                <span class="s-label">Refund Bank / Wallet Name</span>
+                <span class="s-val">HDFC Bank</span>
+              </div>
+              <div class="s-field">
+                <span class="s-label">Refund Initiated Date</span>
+                <span class="s-val">23-04-2026</span>
+              </div>
+              <div class="s-field">
+                <span class="s-label">Refund Processed Date</span>
+                <span class="s-val">N/A</span>
+              </div>
+
+              <div class="s-field">
+                <span class="s-label">Refund Status</span>
+                <span class="s-val"><span class="badge badge-orange">Processing</span></span>
+              </div>
+              <div class="s-field">
+                <span class="s-label">Refund Reference ID</span>
+                <span class="s-val">RF-776946086035</span>
+              </div>
+              <div class="s-field">
+                <span class="s-label">UTR Number</span>
+                <!-- Standard role: masked. Payments/elevated: full UTR -->
+                <span class="s-val">&#42;&#42;&#42;&#42;&#42;&#42;1234</span>
+              </div>
+
+              <div class="s-field">
+                <span class="s-label">Exchange Delta Refunded</span>
+                <span class="s-val"><span class="badge badge-orange">No</span></span>
+              </div>
+              <div class="s-field">
+                <span class="s-label">Delta Refund Amount</span>
+                <span class="s-val">&#8377;500</span>
+              </div>
+              <div class="s-field">
+                <span class="s-label">Refund Failure Reason</span>
+                <span class="s-val">N/A</span>
+              </div>
+
+              <div class="s-field span-3">
+                <span class="s-label">Refund to Source Amount</span>
+                <span class="s-val">&#8377;30,490</span>
+              </div>
+              <div class="s-field span-3">
+                <span class="s-label">Refund to Wallet Amount</span>
+                <span class="s-val">&#8377;500</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div><!-- /orders-content -->
+    </div><!-- /detail-panel -->
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- Status Bar -->
+<div class="status-bar">
+  <span class="stable-pill">Stable</span>
+  <span class="version-txt">v5.3.67-stable.2981b1f2</span>
+  <div style="display:flex;align-items:center;gap:8px;margin-left:8px;">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+  </div>
+  <span class="status-right">23-04-2026 18:38:09 pm | +05:30</span>
+</div>
+
+<script>
+  function toggleAcc(header) {
+    const body = header.nextElementSibling;
+    const icon = header.querySelector('.chevron-icon');
+    const isOpen = body.classList.contains('open');
+    if (isOpen) {
+      body.classList.remove('open');
+      icon.classList.remove('up');
+    } else {
+      body.classList.add('open');
+      icon.classList.add('up');
+    }
+  }
+
+  function toggleSection(header) {
+    const body = header.nextElementSibling;
+    const icon = header.querySelector('.chevron-icon');
+    const isHidden = body.classList.contains('hidden');
+    if (isHidden) {
+      body.classList.remove('hidden');
+      icon.classList.add('up');
+    } else {
+      body.classList.add('hidden');
+      icon.classList.remove('up');
+    }
+  }
+</script>
+
+</body>
+</html>
